@@ -14,6 +14,8 @@ public class PlanMapper {
     static {
         mapper.typeMap(PlanCreateDto.class, Plan.class).addMappings(map -> {
             map.skip(Plan::setId);
+            map.skip(Plan::setCreatedAt);
+            map.skip(Plan::setStatus);
         });
     }
 

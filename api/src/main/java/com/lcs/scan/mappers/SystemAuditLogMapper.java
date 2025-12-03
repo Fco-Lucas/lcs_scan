@@ -6,6 +6,8 @@ import com.lcs.scan.models.SystemAuditLog;
 import com.lcs.scan.repositorys.projections.SystemAuditLogProjection;
 import org.modelmapper.ModelMapper;
 
+import java.time.LocalDateTime;
+
 public class SystemAuditLogMapper {
     private static final ModelMapper mapper = new ModelMapper();
 
@@ -17,7 +19,9 @@ public class SystemAuditLogMapper {
     }
 
     public static SystemAuditLog createToEntity (SystemAuditLogCreateDto createDto) {
-        return mapper.map(createDto, SystemAuditLog.class);
+        SystemAuditLog entity = mapper.map(createDto, SystemAuditLog.class);
+        entity.setCreatedAt(LocalDateTime.now());
+        return entity;
     }
 
     public static SystemAuditLogResponseDto projectionToResponse (SystemAuditLogProjection projection) {

@@ -25,7 +25,6 @@ public class PlanController {
     public ResponseEntity<PlanResponseDto> createPlan (
         @RequestBody @Valid PlanCreateDto createDto
     ) {
-        System.out.println(createDto);
         PlanResponseDto responseDto = service.create(createDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
     }

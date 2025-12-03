@@ -1,11 +1,10 @@
 package com.lcs.scan.dtos.systemAuditLog;
 
 import com.lcs.scan.enums.systemAuditLog.ActionSystemAuditLog;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 public class SystemAuditLogCreateDto {
-    @NotBlank(message = "O campo 'systemUserId' é obrigatório")
+    @NotNull(message = "O campo 'systemUserId' é obrigatório")
     private Long systemUserId;
     @NotNull(message = "O campo 'ActionSystemAuditLog' é obrigatório")
     private ActionSystemAuditLog action;
