@@ -1,0 +1,11 @@
+CREATE TABLE IF NOT EXISTS customers (
+    id BIGSERIAL PRIMARY KEY,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    name VARCHAR(100) NOT NULL,
+    cpf_cnpj VARCHAR(14) NOT NULL,
+    tenant_id VARCHAR(50) NOT NULL UNIQUE,
+    id_plan BIGINT NOT NULL,
+    url_to_post VARCHAR(255) DEFAULT NULL,
+    status VARCHAR(12) NOT NULL DEFAULT 'ACTIVE' CHECK (status IN ('ACTIVE', 'INACTIVE')),
+    CONSTRAINT fk_customers_plan FOREIGN KEY (id_plan) REFERENCES plans(id)
+);
