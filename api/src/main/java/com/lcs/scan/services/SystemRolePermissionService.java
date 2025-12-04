@@ -10,6 +10,8 @@ import com.lcs.scan.repositorys.SystemRolePermissionRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 public class SystemRolePermissionService {
     private final SystemRolePermissionRepository repository;
@@ -45,6 +47,16 @@ public class SystemRolePermissionService {
     @Transactional(readOnly = true)
     public SystemRolePermission getByRoleIdAndPermissionId (Long roleId, Long permissionId) {
         return repository.findByRoleIdAndPermissionId(roleId, permissionId).orElse(null);
+    }
+
+    @Transactional(readOnly = true)
+    public List<SystemRolePermission> getAllByRoleId(Long roleId) {
+        return repository.findAllByRoleId(roleId);
+    }
+
+    @Transactional(readOnly = true)
+    public List<SystemRolePermission> getAllByPermissionId(Long permissionId) {
+        return repository.findAllByPermissionId(permissionId);
     }
 
     @Transactional
