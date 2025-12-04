@@ -24,6 +24,7 @@ public interface CustomerUserRepository extends JpaRepository<CustomerUser, Long
             @Param("idCustomer") Long idCustomer,
             @Param("status") String status
     );
+    Optional<CustomerUser> findByIdAndIdCustomer(Long id, Long idCustomer);
     List<CustomerUser> findAllByIdCustomer(Long idCustomer);
     List<CustomerUser> findAllByIdCustomerAndStatus(Long idCustomer, CustomerUserStatus status);
 }

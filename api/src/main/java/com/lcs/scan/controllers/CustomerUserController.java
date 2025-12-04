@@ -1,16 +1,12 @@
 package com.lcs.scan.controllers;
 
-import com.lcs.scan.dtos.PageableDto;
 import com.lcs.scan.dtos.customerUser.CustomerUserCreateDto;
 import com.lcs.scan.dtos.customerUser.CustomerUserResponseDto;
 import com.lcs.scan.dtos.customerUser.CustomerUserUpdateDto;
 import com.lcs.scan.dtos.customerUser.CustomerUserUpdatePasswordDto;
 import com.lcs.scan.enums.customerUser.CustomerUserStatus;
-import com.lcs.scan.mappers.PageableMapper;
 import com.lcs.scan.services.CustomerUserService;
 import jakarta.validation.Valid;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -46,44 +42,48 @@ public class CustomerUserController {
 
     @GetMapping("/{id}")
     public ResponseEntity<CustomerUserResponseDto> getCustomerUserById (
-            @PathVariable Long id
+            @PathVariable Long id,
+            @PathVariable Long idCustomer
     ) {
-        CustomerUserResponseDto responseDto = service.getByIdDto(id);
+        CustomerUserResponseDto responseDto = service.getByIdAndIdCustomerDto(id, idCustomer);
         return ResponseEntity.status(HttpStatus.OK).body(responseDto);
     }
 
     @PatchMapping("/{id}")
     public ResponseEntity<CustomerUserResponseDto> updateCustomerUser (
-            @PathVariable Long idCustomer,
             @PathVariable Long id,
+            @PathVariable Long idCustomer,
             @RequestBody @Valid CustomerUserUpdateDto updateDto
     ) {
-        CustomerUserResponseDto responseDto = service.update(idCustomer, id, updateDto);
+        CustomerUserResponseDto responseDto = service.update(id, idCustomer, updateDto);
         return ResponseEntity.status(HttpStatus.OK).body(responseDto);
     }
 
-    @PatchMapping("/{id}/updatePassword")
+    @PostMapping("/{id}/updatePassword")
     public ResponseEntity<CustomerUserResponseDto> updatePasswordCustomerUser (
             @PathVariable Long id,
+            @PathVariable Long idCustomer,
             @RequestBody @Valid CustomerUserUpdatePasswordDto updatePasswordDto
     ) {
-        service.updatePassword(id, updatePasswordDto);
+        service.updatePassword(id, idCustomer, updatePasswordDto);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<CustomerUserResponseDto> deleteCustomerUser (
-            @PathVariable Long id
+            @PathVariable Long id,
+            @PathVariable Long idCustomer
     ) {
-        CustomerUserResponseDto responseDto = service.delete(id);
+        CustomerUserResponseDto responseDto = service.delete(id, idCustomer);
         return ResponseEntity.status(HttpStatus.OK).body(responseDto);
     }
 
     @PostMapping("/{id}/restore")
     public ResponseEntity<CustomerUserResponseDto> restoreCustomerUser (
-            @PathVariable Long id
+            @PathVariable Long id,
+            @PathVariable Long idCustomer
     ) {
-        CustomerUserResponseDto responseDto = service.restore(id);
+        CustomerUserResponseDto responseDto = service.restore(id, idCustomer);
         return ResponseEntity.status(HttpStatus.OK).body(responseDto);
     }
 }

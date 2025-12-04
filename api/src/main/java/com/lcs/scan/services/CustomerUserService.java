@@ -51,25 +51,26 @@ public class CustomerUserService {
         return CustomerUserMapper.entityToResponse(saved);
     }
 
-    @Transactional(readOnly = true)
-    public Page<CustomerUserResponseDto> getAllPageable (
-            Pageable pageable,
-            Long idCustomer,
-            CustomerUserStatus status
-    ) {
-        String filterStatus = status == null ? null : status.toString();
-
-        Page<CustomerUserProjection> entries = repository.findAllPageable(
-                pageable,
-                idCustomer,
-                filterStatus
-        );
-
-        return entries.map(CustomerUserMapper::projectionToResponse);
-    }
+//    @Transactional(readOnly = true)
+//    public Page<CustomerUserResponseDto> getAllPageable (
+//            Pageable pageable,
+//            Long idCustomer,
+//            CustomerUserStatus status
+//    ) {
+//        String filterStatus = status == null ? null : status.toString();
+//
+//        Page<CustomerUserProjection> entries = repository.findAllPageable(
+//                pageable,
+//                idCustomer,
+//                filterStatus
+//        );
+//
+//        return entries.map(CustomerUserMapper::projectionToResponse);
+//    }
 
     @Transactional(readOnly = true)
     public List<CustomerUserResponseDto> getAllByIdCustomer (Long idCustomer, CustomerUserStatus status) {
+        customerService.getById(idCustomer);
         List<CustomerUser> entries = status == null ? repository.findAllByIdCustomer(idCustomer) : repository.findAllByIdCustomerAndStatus(idCustomer, status);
         return entries.stream().map(CustomerUserMapper::entityToResponse).collect(Collectors.toList());
     }
@@ -81,15 +82,23 @@ public class CustomerUserService {
         );
     }
 
+
     @Transactional(readOnly = true)
-    public CustomerUserResponseDto getByIdDto (Long id) {
-        CustomerUser entity = getById(id);
+    public CustomerUser getByIdAndIdCustomer (Long id, Long idCustomer) {
+        return repository.findByIdAndIdCustomer(id, idCustomer).orElseThrow(
+                () -> new EntityNotFoundException(String.format("Usuário com ID: %s não encontrado no sistema pertencente ao cliente com ID: %s", id, idCustomer))
+        );
+    }
+
+    @Transactional(readOnly = true)
+    public CustomerUserResponseDto getByIdAndIdCustomerDto (Long id, Long idCustomer) {
+        CustomerUser entity = getByIdAndIdCustomer(id, idCustomer);
         return CustomerUserMapper.entityToResponse(entity);
     }
 
     @Transactional
-    public CustomerUserResponseDto update (Long idCustomer, Long id, CustomerUserUpdateDto updateDto) {
-        CustomerUser entity = getById(id);
+    public CustomerUserResponseDto update (Long id, Long idCustomer, CustomerUserUpdateDto updateDto) {
+        CustomerUser entity = getByIdAndIdCustomer(id, idCustomer);
 
         if (updateDto.getLogin() != null && !updateDto.getLogin().equals(entity.getLogin())) {
             CustomerUser exists = getByIdCustomerAndLoginAndStatus(idCustomer, updateDto.getLogin(), CustomerUserStatus.ACTIVE);
@@ -103,8 +112,8 @@ public class CustomerUserService {
     }
 
     @Transactional
-    public void updatePassword (Long id, CustomerUserUpdatePasswordDto updatePasswordDto) {
-        CustomerUser entity = getById(id);
+    public void updatePassword (Long id, Long idCustomer, CustomerUserUpdatePasswordDto updatePasswordDto) {
+        CustomerUser entity = getByIdAndIdCustomer(id, idCustomer);
 
         String currentPassword = updatePasswordDto.getCurrentPassword();
         String newPassword = updatePasswordDto.getNewPassword();
@@ -119,16 +128,16 @@ public class CustomerUserService {
     }
 
     @Transactional
-    public CustomerUserResponseDto delete (Long id) {
-        CustomerUser entity = getById(id);
+    public CustomerUserResponseDto delete (Long id, Long idCustomer) {
+        CustomerUser entity = getByIdAndIdCustomer(id, idCustomer);
         entity.setStatus(CustomerUserStatus.INACTIVE);
         CustomerUser saved = repository.save(entity);
         return CustomerUserMapper.entityToResponse(saved);
     }
 
     @Transactional
-    public CustomerUserResponseDto restore (Long id) {
-        CustomerUser entity = getById(id);
+    public CustomerUserResponseDto restore (Long id, Long idCustomer) {
+        CustomerUser entity = getByIdAndIdCustomer(id, idCustomer);
         entity.setStatus(CustomerUserStatus.ACTIVE);
         CustomerUser saved = repository.save(entity);
         return CustomerUserMapper.entityToResponse(saved);
