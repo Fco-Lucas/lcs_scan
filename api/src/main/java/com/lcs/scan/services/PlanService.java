@@ -3,16 +3,17 @@ package com.lcs.scan.services;
 import com.lcs.scan.dtos.plan.PlanCreateDto;
 import com.lcs.scan.dtos.plan.PlanResponseDto;
 import com.lcs.scan.dtos.plan.PlanUpdateDto;
+import com.lcs.scan.enums.customer.CustomerStatus;
 import com.lcs.scan.enums.plan.PlanStatus;
 import com.lcs.scan.exceptions.customExceptions.EntityExistsException;
 import com.lcs.scan.exceptions.customExceptions.EntityNotFoundException;
 import com.lcs.scan.mappers.PlanMapper;
+import com.lcs.scan.models.Customer;
 import com.lcs.scan.models.Plan;
 import com.lcs.scan.repositorys.PlanRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -20,9 +21,11 @@ import java.util.stream.Collectors;
 @Service
 public class PlanService {
     private final PlanRepository repository;
+    private final CustomerService customerService;
 
-    public PlanService(PlanRepository repository) {
+    public PlanService(PlanRepository repository, CustomerService customerService) {
         this.repository = repository;
+        this.customerService = customerService;
     }
 
     @Transactional(readOnly = true)
@@ -65,7 +68,12 @@ public class PlanService {
     public PlanResponseDto update (Long id, PlanUpdateDto updateDto) {
         Plan entity = getById(id);
 
-        if (updateDto.getName() != null && !updateDto.getName().equals(entity.getName())) entity.setName(updateDto.getName());
+        if (updateDto.getName() != null && !updateDto.getName().equals(entity.getName())) {
+            // Verifica se o nome já está em uso
+            Plan exists = getByNameAndStatus(updateDto.getName(), PlanStatus.ACTIVE);
+            if (exists != null && !exists.getId().equals(entity.getId())) throw new EntityExistsException(String.format("Plano com nome: %s ativo no sistema", updateDto.getName()));
+            entity.setName(updateDto.getName());
+        }
         if (updateDto.getImagesAvailable() != null && !updateDto.getImagesAvailable().equals(entity.getImagesAvailable())) entity.setImagesAvailable(updateDto.getImagesAvailable());
         if (updateDto.getObservations() != null && !updateDto.getObservations().equals(entity.getObservations())) entity.setObservations(updateDto.getObservations());
 
@@ -76,6 +84,11 @@ public class PlanService {
     @Transactional
     public PlanResponseDto delete (Long id) {
         Plan entity = getById(id);
+
+        // Verifica se tem algum cliente usando esse plano
+        List<Customer> customersUsingThisPlan = customerService.getAllByIdPlanAndStatus(id, CustomerStatus.ACTIVE);
+        if (!customersUsingThisPlan.isEmpty()) throw new RuntimeException("O plano informado possui clientes ativos utilizando-o, para remove-lo, substitua o plano destes clientes");
+
         entity.setStatus(PlanStatus.INACTIVE);
         Plan saved = repository.save(entity);
         return PlanMapper.planToResponse(saved);
