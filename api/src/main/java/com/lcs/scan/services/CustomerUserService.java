@@ -82,7 +82,6 @@ public class CustomerUserService {
         );
     }
 
-
     @Transactional(readOnly = true)
     public CustomerUser getByIdAndIdCustomer (Long id, Long idCustomer) {
         return repository.findByIdAndIdCustomer(id, idCustomer).orElseThrow(
